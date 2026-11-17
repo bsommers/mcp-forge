@@ -259,3 +259,8 @@ def test_template_passes_with_allow_skip(tmp_path):
     shutil.copytree(ROOT / "template", dst, ignore=shutil.ignore_patterns("__pycache__"))
     res = validate(dst, allow_skip=True)
     assert all(r.ok for r in res), [(r.step, r.stderr) for r in res if not r.ok]
+
+
+def test_handled_network_error_text_is_not_a_crash():
+    from forge import validate
+    assert validate.HANDLED_ERR_RE.search("Error executing tool x: Network error: ConnectError")

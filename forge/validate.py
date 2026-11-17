@@ -364,7 +364,7 @@ def _check_schema(schema: object) -> str | None:
 
 # Errors a tool raised on purpose (typed upstream/auth errors, bad dummy input): not crashes.
 HANDLED_ERR_RE = re.compile(
-    r"upstream|HTTP\s*[45]\d\d|\b[45]\d\d\b.*(error|not found|limited|forbidden)|resource not found|"
+    r"upstream|network error|HTTP\s*[45]\d\d|\b[45]\d\d\b.*(error|not found|limited|forbidden)|resource not found|"
     r"rate limited|authentication failed|missing required environment variable|"
     r"validation error|input should be|unreachable|timed out|connection (error|refused)|"
     r"invalid (argument|input|value)",
