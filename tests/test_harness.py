@@ -234,3 +234,14 @@ def test_timeout_is_violation_and_failure(tpl, tmp_path):
     res = harness.run_loop(out, agent, validator=ok_val)
     assert not res.ok and any("timed out" in v for v in res.violations)
     assert (out / "src/index.py").read_text() == "LOCKED\n"
+
+
+def test_run_loop_fails_fast_without_agent_credentials(tmp_path, monkeypatch):
+    import json
+    for k in ("ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN", "CLAUDE_CODE_OAUTH_TOKEN",
+              "ANTHROPIC_BASE_URL", "ANTHROPIC_MODEL"):
+        monkeypatch.delenv(k, raising=False)
+    (tmp_path / "forge-manifest.json").write_text(json.dumps({"name": "x", "tools": []}))
+    res = harness.run_loop(tmp_path, agent="claude")
+    assert not res.ok and res.iterations == 0
+    assert "no credentials for claude" in res.agent_errors[0]

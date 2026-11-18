@@ -57,6 +57,9 @@ def scaffold(manifest, out_dir, template_dir=None, force: bool = False) -> Path:
     shutil.copytree(tpl, out, dirs_exist_ok=True, symlinks=True, ignore=shutil.ignore_patterns(*_IGNORE))
     (out / "src" / "tools").mkdir(parents=True, exist_ok=True)
     (out / "tests").mkdir(parents=True, exist_ok=True)
+    # Placeholder echo tool + its test are template-only: generated servers must not ship them.
+    for rel in ("src/tools/example.py", "tests/test_echo.py"):
+        (out / rel).unlink(missing_ok=True)
     (out / "forge-manifest.json").write_text(json.dumps(_manifest_dict(manifest), indent=2) + "\n")
     return out
 
@@ -262,6 +265,15 @@ def run_loop(out_dir, agent_cmd=None, max_iters: int = 3, validator=None,
     snap = snapshot_locked(root)
     task = _prompt.build_task_prompt(manifest)
     out = LoopResult(ok=False, iterations=0)
+    if not callable(agent_cmd) and runner_exec is subprocess.run:
+        from .agents import agent_for_cmd
+        ad = agent_for_cmd(agent_cmd)
+        # The agent runs with a scratch HOME, so a local `login` is not visible: it needs an env credential.
+        if ad and ad.auth_env and not any(os.environ.get(k) for k in ad.auth_env):
+            out.agent_errors.append(
+                f"no credentials for {ad.name}: the agent runs with a scrubbed env and scratch HOME, so set one of "
+                f"{', '.join(ad.auth_env)} (for claude: `claude setup-token` gives CLAUDE_CODE_OAUTH_TOKEN)")
+            return out
     for _ in range(max_iters + 1):  # initial generation + max_iters fix rounds
         agent_failure = None
         try:
@@ -276,6 +288,9 @@ def run_loop(out_dir, agent_cmd=None, max_iters: int = 3, validator=None,
         out.iterations += 1
         rc = getattr(proc, "returncode", 0)
         err = (getattr(proc, "stderr", "") or "") if isinstance(getattr(proc, "stderr", ""), str) else ""
+        so = getattr(proc, "stdout", "")
+        if isinstance(rc, int) and rc != 0 and not err.strip() and isinstance(so, str):
+            err = so  # some CLIs (claude) report errors such as "Not logged in" on stdout
         if isinstance(rc, int) and rc != 0:
             agent_failure = f"agent exited with code {rc}: {err[-2000:]}"
             out.agent_errors.append(agent_failure)

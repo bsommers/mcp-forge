@@ -16,7 +16,15 @@ SCOPED WRITE ACCESS (hard rule, enforced by checksum + automatic revert):
 
 TOOL DESIGN RULES:
 - Implement exactly the tools in forge-manifest.json, one module per tool in src/tools/,
-  each module exposing register(mcp). Mimic the example tool already in src/tools/.
+  each module exposing register(mcp). Follow this pattern:
+      from typing import Any
+      from pydantic import Field
+      def register(mcp: Any) -> None:
+          @mcp.tool()
+          def verb_noun(arg: str = Field(description="...", min_length=1)) -> str:
+              \"\"\"Plain description.\"\"\"
+              return "..."
+  Write tests/test_<tool>.py for your tools; keep tests/test_example.py (covers locked infra).
 - Tool names are verb_noun snake_case and match the manifest.
 - Every input parameter has strict Pydantic validation and a clear description.
 - Return concise, LLM-friendly summaries, never raw multi-megabyte API dumps (truncate/summarize).
