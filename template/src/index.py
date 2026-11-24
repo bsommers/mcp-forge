@@ -5,10 +5,10 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from mcp.server.fastmcp import FastMCP  # noqa: E402
+from mcp.server.fastmcp import FastMCP
 
-from logging_util import get_logger  # noqa: E402
-from tools import register  # noqa: E402
+from logging_util import get_logger
+from tools import register
 
 log = get_logger()
 

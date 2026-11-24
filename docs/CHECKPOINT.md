@@ -1,7 +1,7 @@
 # Checkpoint
 
 ## State
-- Forge (Python FastMCP generator): public repo bsommers/mcp-forge, `main` pushed (last: cd325f1), 133 tests pass.
+- Forge (Python FastMCP generator): public repo bsommers/mcp-forge, `main` pushed (last: cd325f1), 134 tests pass.
 - Tracker: public repo bsommers/build-tracker (~/src/tools/build-tracker), pushed (77a442b).
 - Tracker dashboard served by `serve.py` on 0.0.0.0:8791 (no auth, LAN only), serving the forge/tracker dir (gitignored in forge).
 - Agents: claude, agy verified; cursor adapter unverified (cursor-agent not installed).
@@ -26,3 +26,5 @@
 
 ## Next command
 cd /home/bill/src/swe/forge && uv run --with pytest --with pyyaml --with pydantic --with httpx --with 'mcp<2' python -m pytest -q tests
+
+- 2026-11-23: ruff+semgrep installed; template lint bug fixed (unused noqa/import); agy strict e2e (no --allow-skip) converges. Docker daemon hangs on `docker create` (host issue; sandbox untested). claude e2e still needs CLAUDE_CODE_OAUTH_TOKEN/ANTHROPIC_API_KEY.

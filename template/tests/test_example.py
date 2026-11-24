@@ -5,7 +5,6 @@ import pytest
 
 from errors import UpstreamError
 from http_client import request_json
-from index import build_server
 from logging_util import JsonFormatter
 
 
